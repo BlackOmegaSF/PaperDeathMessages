@@ -43,11 +43,10 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
         Random random = new Random();
         if(cause == DamageCause.DROWNING) { //Death by drowning
             int drownRand = random.nextInt(2);
+            stringBuilder.append(displayName);
             if(drownRand == 0) {
-                stringBuilder.append(displayName);
                 stringBuilder.append(" forgot how to swim");
-            } else if(drownRand == 1) {
-                stringBuilder.append(displayName);
+            } else {
                 stringBuilder.append(" discovered they don't have gills");
             }
 
@@ -64,7 +63,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 stringBuilder.append("Oof ouch owie ");
                 stringBuilder.append(displayName);
                 stringBuilder.append("'s bones");
-            } else if(flyRand == 2) {
+            } else {
                 stringBuilder.append(displayName);
                 stringBuilder.append(" performed a controlled flight into terrain");
             }
