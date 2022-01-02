@@ -5,6 +5,7 @@ import java.util.Random;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,6 +25,11 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
     @EventHandler
     public void entityDeath(PlayerDeathEvent event) {
         Player player = event.getEntity();
+        EntityDamageEvent damageEvent = player.getLastDamageCause();
+        if (damageEvent == null) {
+            //No death actually happened, probably cancelled by something
+            return;
+        }
         DamageCause cause = player.getLastDamageCause().getCause();
 
         StringBuilder stringBuilder = new StringBuilder();
