@@ -74,7 +74,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 ItemMeta itemMeta = killer.getInventory().getItemInMainHand().getItemMeta();
                 String name = itemMeta.displayName() == null ? "" : serializeComponent(itemMeta.displayName());
                 if (name.equals(bitchwhipper)) {
-                    stringBuilder.append(PlainTextComponentSerializer.plainText().serialize(killer.displayName()));
+                    stringBuilder.append(serializeComponent(killer.displayName()));
                     stringBuilder.append(" bitchwhipped ");
                     stringBuilder.append(displayName);
                     player.getWorld().playSound(player.getLocation(), "custom.whip", 1F, 1F);
