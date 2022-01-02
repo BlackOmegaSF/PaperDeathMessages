@@ -38,7 +38,6 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             return;
         }
         DamageCause cause = player.getLastDamageCause().getCause();
-        //String displayName = serializeComponent(player.displayName());
         Component displayName = player.displayName();
 
         TextComponent.Builder componentBuilder = Component.empty().toBuilder();
