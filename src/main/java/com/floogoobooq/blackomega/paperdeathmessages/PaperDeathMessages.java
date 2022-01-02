@@ -1,8 +1,5 @@
 package com.floogoobooq.blackomega.paperdeathmessages;
 
-import java.util.Objects;
-import java.util.Random;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -14,6 +11,8 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Random;
 
 public class PaperDeathMessages extends JavaPlugin implements Listener {
 
