@@ -1,7 +1,10 @@
 package com.floogoobooq.blackomega.paperdeathmessages;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.serializer.ComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,36 +38,37 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             return;
         }
         DamageCause cause = player.getLastDamageCause().getCause();
-        String displayName = serializeComponent(player.displayName());
+        //String displayName = serializeComponent(player.displayName());
+        Component displayName = player.displayName();
 
-        StringBuilder stringBuilder = new StringBuilder();
+        TextComponent.Builder componentBuilder = Component.empty().toBuilder();
 
         Random random = new Random();
         if(cause == DamageCause.DROWNING) { //Death by drowning
             int drownRand = random.nextInt(2);
-            stringBuilder.append(displayName);
+            componentBuilder.append(displayName);
             if(drownRand == 0) {
-                stringBuilder.append(" forgot how to swim");
+                componentBuilder.append(Component.text(" forgot how to swim"));
             } else {
-                stringBuilder.append(" discovered they don't have gills");
+                componentBuilder.append(Component.text(" discovered they don't have gills"));
             }
 
         } else if(cause == DamageCause.LIGHTNING) { //Death by lightning (not fire afterwards)
-            stringBuilder.append(displayName);
-            stringBuilder.append(" built up too much charge");
+            componentBuilder.append(displayName);
+            componentBuilder.append(Component.text(" built up too much charge"));
 
         } else if(cause == DamageCause.FLY_INTO_WALL) { //Death by hitting a wall with elytra (not when hitting ground)
             int flyRand = random.nextInt(3);
             if(flyRand == 0) {
-                stringBuilder.append(displayName);
-                stringBuilder.append(" forgot their flying lessons");
+                componentBuilder.append(displayName);
+                componentBuilder.append(Component.text(" forgot their flying lessons"));
             } else if(flyRand == 1) {
-                stringBuilder.append("Oof ouch owie ");
-                stringBuilder.append(displayName);
-                stringBuilder.append("'s bones");
+                componentBuilder.append(Component.text("Oof ouch owie "));
+                componentBuilder.append(displayName);
+                componentBuilder.append(Component.text("'s bones"));
             } else {
-                stringBuilder.append(displayName);
-                stringBuilder.append(" performed a controlled flight into terrain");
+                componentBuilder.append(displayName);
+                componentBuilder.append(Component.text(" performed a controlled flight into terrain"));
             }
 
         } else if(cause == DamageCause.ENTITY_ATTACK || cause == DamageCause.ENTITY_SWEEP_ATTACK) { //Death by whack
@@ -72,33 +76,32 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 Player killer = player.getKiller();
                 String bitchwhipper = "The Bitchwhipper";
                 ItemMeta itemMeta = killer.getInventory().getItemInMainHand().getItemMeta();
-                String name = itemMeta.displayName() == null ? "" : serializeComponent(itemMeta.displayName());
+                String name = serializeComponent(itemMeta.displayName());
                 if (name.equals(bitchwhipper)) {
-                    stringBuilder.append(serializeComponent(killer.displayName()));
-                    stringBuilder.append(" bitchwhipped ");
-                    stringBuilder.append(displayName);
+                    componentBuilder.append(killer.displayName());
+                    componentBuilder.append(Component.text(" bitchwhipped "));
+                    componentBuilder.append(displayName);
                     player.getWorld().playSound(player.getLocation(), "custom.whip", 1F, 1F);
                 } else {
-                    stringBuilder.append(serializeComponent(event.deathMessage()));
+                    componentBuilder.append(checkNullComponent(event.deathMessage()));
                 }
             } else {
-                stringBuilder.append(serializeComponent(event.deathMessage()));
+                componentBuilder.append(checkNullComponent(event.deathMessage()));
             }
 
         } else {
-            stringBuilder.append(serializeComponent(event.deathMessage()));
+            componentBuilder.append(checkNullComponent(event.deathMessage()));
         }
 
-        stringBuilder.append(" at [");
-        stringBuilder.append(player.getLocation().getBlockX());
-        stringBuilder.append(", ");
-        stringBuilder.append(player.getLocation().getBlockY());
-        stringBuilder.append(", ");
-        stringBuilder.append(player.getLocation().getBlockZ());
-        stringBuilder.append("]");
+        componentBuilder.append(Component.text(" at ["));
+        componentBuilder.append(Component.text(player.getLocation().getBlockX()));
+        componentBuilder.append(Component.text(", "));
+        componentBuilder.append(Component.text(player.getLocation().getBlockY()));
+        componentBuilder.append(Component.text(", "));
+        componentBuilder.append(Component.text(player.getLocation().getBlockZ()));
+        componentBuilder.append(Component.text("]"));
 
-        TextComponent deathMessage = Component.text(stringBuilder.toString());
-        event.deathMessage(deathMessage);
+        event.deathMessage(componentBuilder.asComponent());
 
         player.getWorld().playSound(player.getLocation(), "custom.oof", 1F, 1F);
     }
@@ -108,6 +111,14 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             return "";
         } else {
             return PlainTextComponentSerializer.plainText().serialize(component);
+        }
+    }
+
+    private Component checkNullComponent(Component component) {
+        if (component == null) {
+            return Component.text("");
+        } else {
+            return component;
         }
     }
 }
