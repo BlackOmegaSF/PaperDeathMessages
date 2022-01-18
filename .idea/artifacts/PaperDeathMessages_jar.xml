@@ -4,6 +4,7 @@
     <root id="archive" name="PaperDeathMessages.jar">
       <element id="module-output" name="PaperDeathMessages" />
       <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/plugin.yml" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/BlackOmegaUpdaterInfo.json" />
     </root>
   </artifact>
 </component>
