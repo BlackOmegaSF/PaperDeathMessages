@@ -177,13 +177,13 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             final String _START = "START";
             final String _STOP = "STOP";
             switch (args[0].toUpperCase()) {
-                case _START -> {
+                case _START:
                     playersToTrack.add(targetPlayer.getName());
                     getConfig().set("players", playersToTrack);
                     saveConfig();
                     return true;
-                }
-                case _STOP -> {
+
+                case _STOP:
                     try {
                         playersToTrack.remove(targetPlayer.getName());
                         getConfig().set("players", playersToTrack);
@@ -192,11 +192,10 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                         sender.sendMessage("Player was not being logged");
                     }
                     return true;
-                }
-                case default -> {
+
+                case default:
                     sender.sendMessage("Invalid parameter \"" + args[0].toUpperCase() + "\"");
                     return false;
-                }
             }
 
         }
@@ -222,7 +221,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 }
             } else if (args.length == 2) {
                 switch (args[0].toUpperCase()) {
-                    case "START" -> {
+                    case "START":
                         if (args[1].isEmpty()) {
                             for (Player player : sender.getServer().getOnlinePlayers()) {
                                 if (!playersToTrack.contains(player.getName())) {
@@ -236,9 +235,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                                 }
                             }
                         }
-
-                    }
-                    case "STOP" -> {
+                    case "STOP":
                         if (args[1].isEmpty()) {
                             tabCompleteValues.addAll(playersToTrack);
                         } else {
@@ -249,7 +246,6 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                                 }
                             }
                         }
-                    }
 
                 }
 
