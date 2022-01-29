@@ -6,6 +6,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,6 +17,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 public class PaperDeathMessages extends JavaPlugin implements Listener {
 
@@ -41,6 +44,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
 
         //Register player logging command
         this.getCommand("logdeaths").setExecutor(new CommandLogDeaths());
+        this.getCommand("logdeaths").setTabCompleter(new LogDeathsTabCompleter());
 
 
     }
@@ -197,6 +201,62 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
         }
     }
 
+    public class LogDeathsTabCompleter implements TabCompleter {
 
+        @Override
+        public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+            List<String> tabCompleteValues = new ArrayList<>();
+            if (args.length == 1) {
+                if (args[0].isEmpty()) {
+                    tabCompleteValues.add("START");
+                    tabCompleteValues.add("STOP");
+                } else {
+                    Pattern pattern = Pattern.compile(args[0].toUpperCase());
+                    if (pattern.matcher("START").lookingAt()) {
+                        tabCompleteValues.add("START");
+                    }
+                    if (pattern.matcher("STOP").lookingAt()) {
+                        tabCompleteValues.add("STOP");
+                    }
+                }
+            } else if (args.length == 2) {
+                switch (args[0].toUpperCase()) {
+                    case "START" -> {
+                        if (args[1].isEmpty()) {
+                            for (Player player : sender.getServer().getOnlinePlayers()) {
+                                if (!playersToTrack.contains(player.getName())) {
+                                    tabCompleteValues.add(player.getName());
+                                }
+                            }
+                        } else {
+                            for (Player player : sender.getServer().matchPlayer(args[1])) {
+                                if (!playersToTrack.contains(player.getName())) {
+                                    tabCompleteValues.add(player.getName());
+                                }
+                            }
+                        }
+
+                    }
+                    case "STOP" -> {
+                        if (args[1].isEmpty()) {
+                            tabCompleteValues.addAll(playersToTrack);
+                        } else {
+                            for(String name : playersToTrack) {
+                                Pattern pattern = Pattern.compile(args[1].toUpperCase());
+                                if (pattern.matcher(name.toUpperCase()).lookingAt()) {
+                                    tabCompleteValues.add(name);
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+            } else if (args.length > 2) {
+                tabCompleteValues.add("Too many arguments!");
+            }
+            return tabCompleteValues;
+        }
+    }
 
 }
