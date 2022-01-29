@@ -2,3 +2,7 @@ name: PaperDeathMessages
 version: 2.0.1
 main: com.floogoobooq.blackomega.paperdeathmessages.PaperDeathMessages
 api-version: 1.18
+commands:
+  logdeaths:
+    description: Logs player's deaths
+    usage: Usage is /logdeaths <start | stop> <player>

@@ -3,6 +3,9 @@ package com.floogoobooq.blackomega.paperdeathmessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,35 +15,33 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 public class PaperDeathMessages extends JavaPlugin implements Listener {
 
-    private final HashSet<UUID> playersToTrack = new HashSet<>();
+    private final List<String> playersToTrack = new ArrayList<>();
     File serverFolder;
-    FileConfiguration saveData;
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         saveDefaultConfig(); //Saves default config if none exists. Will not overwrite existing
         //Get and load config
-        saveData = this.getConfig();
-        List<String> trackedPlayers = saveData.getStringList("players");
-        for (String playerID : trackedPlayers) {
-            playersToTrack.add(UUID.fromString(playerID));
-        }
+        List<String> loadedTrackedPlayers = getConfig().getStringList("players");
+        playersToTrack.addAll(loadedTrackedPlayers);
         serverFolder = getServer().getWorldContainer();
+
+        //Register player logging command
+        this.getCommand("logdeaths").setExecutor(new CommandLogDeaths());
+
 
     }
 
@@ -126,7 +127,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
 
         //Log the death message to output file
         try {
-            if (playersToTrack.contains(player.getUniqueId())) { //Player's death should be tracked
+            if (playersToTrack.contains(player.getName())) { //Player's death should be tracked
                 //Create empty player log file if it doesn't exist
                 File playerDeathLog = new File(serverFolder, player.getName() + "Deaths.log");
                 playerDeathLog.createNewFile();
@@ -149,10 +150,53 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
     }
 
     private Component checkNullComponent(Component component) {
-        if (component == null) {
-            return Component.text("");
-        } else {
-            return component;
+        return Objects.requireNonNullElseGet(component, () -> Component.text(""));
+    }
+
+    public class CommandLogDeaths implements CommandExecutor {
+
+        @Override
+        public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+            if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
+                return false;
+            } else if (args.length < 2) {
+                sender.sendMessage("Missing arguments");
+            }
+
+            Player targetPlayer = sender.getServer().getPlayer(args[1]);
+            if (targetPlayer == null) {
+                sender.sendMessage("Player not found");
+                return false;
+            }
+
+            final String _START = "START";
+            final String _STOP = "STOP";
+            switch (args[0].toUpperCase()) {
+                case _START -> {
+                    playersToTrack.add(targetPlayer.getName());
+                    getConfig().set("players", playersToTrack);
+                    saveConfig();
+                    return true;
+                }
+                case _STOP -> {
+                    try {
+                        playersToTrack.remove(targetPlayer.getName());
+                        getConfig().set("players", playersToTrack);
+                        saveConfig();
+                    } catch (NullPointerException e) {
+                        sender.sendMessage("Player was not being logged");
+                    }
+                    return true;
+                }
+                case default -> {
+                    sender.sendMessage("Invalid parameter \"" + args[0].toUpperCase() + "\"");
+                    return false;
+                }
+            }
+
         }
     }
+
+
+
 }
