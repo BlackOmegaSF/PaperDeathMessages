@@ -193,7 +193,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                     }
                     return true;
 
-                case default:
+                default:
                     sender.sendMessage("Invalid parameter \"" + args[0].toUpperCase() + "\"");
                     return false;
             }
