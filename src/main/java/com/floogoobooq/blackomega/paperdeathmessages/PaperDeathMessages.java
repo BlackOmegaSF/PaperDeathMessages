@@ -3,6 +3,7 @@ package com.floogoobooq.blackomega.paperdeathmessages;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,13 +13,35 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
+import java.util.UUID;
+import java.util.logging.Level;
 
 public class PaperDeathMessages extends JavaPlugin implements Listener {
+
+    private final HashSet<UUID> playersToTrack = new HashSet<>();
+    File serverFolder;
+    FileConfiguration saveData;
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
+        saveDefaultConfig(); //Saves default config if none exists. Will not overwrite existing
+        //Get and load config
+        saveData = this.getConfig();
+        List<String> trackedPlayers = saveData.getStringList("players");
+        for (String playerID : trackedPlayers) {
+            playersToTrack.add(UUID.fromString(playerID));
+        }
+        serverFolder = getServer().getWorldContainer();
+
     }
 
     @Override
@@ -100,6 +123,21 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
         event.deathMessage(componentBuilder.asComponent());
 
         player.getWorld().playSound(player.getLocation(), "custom.oof", 1F, 1F);
+
+        //Log the death message to output file
+        try {
+            if (playersToTrack.contains(player.getUniqueId())) { //Player's death should be tracked
+                //Create empty player log file if it doesn't exist
+                File playerDeathLog = new File(serverFolder, player.getName() + "Deaths.log");
+                playerDeathLog.createNewFile();
+                Files.write(playerDeathLog.toPath(), (serializeComponent(event.deathMessage()) + "\r\n").getBytes(), StandardOpenOption.APPEND);
+            }
+        } catch (IOException e) {
+            getLogger().log(Level.WARNING, "Can't log death of " + player.getName() + ", IOError");
+        }
+
+
+
     }
 
     private String serializeComponent(Component component) {
