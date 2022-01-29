@@ -177,13 +177,13 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             final String _START = "START";
             final String _STOP = "STOP";
             switch (args[0].toUpperCase()) {
-                case _START:
+                case _START -> {
                     playersToTrack.add(targetPlayer.getName());
                     getConfig().set("players", playersToTrack);
                     saveConfig();
                     return true;
-
-                case _STOP:
+                }
+                case _STOP -> {
                     try {
                         playersToTrack.remove(targetPlayer.getName());
                         getConfig().set("players", playersToTrack);
@@ -192,10 +192,11 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                         sender.sendMessage("Player was not being logged");
                     }
                     return true;
-
-                default:
+                }
+                default -> {
                     sender.sendMessage("Invalid parameter \"" + args[0].toUpperCase() + "\"");
                     return false;
+                }
             }
 
         }
