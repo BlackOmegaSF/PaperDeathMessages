@@ -8,6 +8,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.PatternSyntaxException;
 
 public class ComponentHandler {
 
@@ -317,11 +318,11 @@ public class ComponentHandler {
         if (deathMessageTranslations.containsKey(key)) { //Given key is a translatable death message
             String formatString = deathMessageTranslations.get(key).iterator().next();
             int numArgs = 0; //Assume no args
-            if (formatString.matches("%3\\$s")) { //There are 3 arguments
+            if (formatString.matches(".*%3\\$s.*")) { //There are 3 arguments
                 numArgs = 3;
-            } else if (formatString.matches("%2\\$s")) { // 2 args
+            } else if (formatString.matches(".*%2\\$s.*")) { // 2 args
                 numArgs = 2;
-            } else if (formatString.matches("%1\\$s")) { // 1 arg
+            } else if (formatString.matches(".*%1\\$s.*")) { // 1 arg
                 numArgs = 1;
             }
             if (args.size() < numArgs) {
@@ -329,7 +330,8 @@ public class ComponentHandler {
             }
             for (int i = 1; i <= numArgs; i++) { //Loop through args and parse
                 String regex = "%" + i + "\\$s";
-                formatString = formatString.replaceAll(regex, processComplexComponent(args.get(i)));
+                formatString = formatString.replaceAll(regex, processComplexComponent(args.get(i-1)));
+
             }
             return formatString;
         } else if (otherTranslations.containsKey(key)) { //Given key is a translatable entity or whatever else is included in the list
