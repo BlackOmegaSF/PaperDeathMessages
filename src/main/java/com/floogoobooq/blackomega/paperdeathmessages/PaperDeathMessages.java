@@ -2,8 +2,6 @@ package com.floogoobooq.blackomega.paperdeathmessages;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -25,10 +23,11 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+
+import static com.floogoobooq.blackomega.paperdeathmessages.ComponentHandler.checkNullComponent;
 
 public class PaperDeathMessages extends JavaPlugin implements Listener {
 
@@ -102,7 +101,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 Player killer = player.getKiller();
                 String bitchwhipper = "The Bitchwhipper";
                 ItemMeta itemMeta = killer.getInventory().getItemInMainHand().getItemMeta();
-                String name = serializeComponent(itemMeta.displayName());
+                String name = ComponentHandler.serializePlainComponent(itemMeta.displayName());
                 if (name.equals(bitchwhipper)) {
                     componentBuilder.append(killer.displayName());
                     componentBuilder.append(Component.text(" bitchwhipped "));
@@ -137,34 +136,12 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 //Create empty player log file if it doesn't exist
                 File playerDeathLog = new File(serverFolder, player.getName() + "Deaths.log");
                 playerDeathLog.createNewFile();
-                Files.write(playerDeathLog.toPath(), (serializeComponentToJson(event.deathMessage()) + "\r\n").getBytes(), StandardOpenOption.APPEND);
+                Files.write(playerDeathLog.toPath(), (ComponentHandler.serializeComplexComponent(event.deathMessage()) + "\r\n").getBytes(), StandardOpenOption.APPEND);
             }
         } catch (IOException e) {
             getLogger().log(Level.WARNING, "Can't log death of " + player.getName() + ", IOError");
         }
 
-
-
-    }
-
-    private String serializeComponent(Component component) {
-        if (component == null) {
-            return "";
-        } else {
-            return PlainTextComponentSerializer.plainText().serialize(component);
-        }
-    }
-
-    private String serializeComponentToJson(Component component) {
-        if (component == null) {
-            return "";
-        } else {
-            return GsonComponentSerializer.gson().serialize(component);
-        }
-    }
-
-    private Component checkNullComponent(Component component) {
-        return Objects.requireNonNullElseGet(component, () -> Component.text(""));
     }
 
     public class CommandLogDeaths implements CommandExecutor {
