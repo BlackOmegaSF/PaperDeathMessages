@@ -5,18 +5,14 @@ import com.google.common.collect.Multimap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.kyori.adventure.translation.GlobalTranslator;
 
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 public class ComponentHandler {
 
-    private static Multimap<String, String> deathMessageTranslations;
-    private static Multimap<String, String> otherTranslations;
-    private static final Locale defaultLocale = Locale.ENGLISH;
+    private static final Multimap<String, String> deathMessageTranslations;
+    private static final Multimap<String, String> otherTranslations;
 
     static {
         Multimap<String, String> multimap = ArrayListMultimap.create();
