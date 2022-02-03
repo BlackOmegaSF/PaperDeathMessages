@@ -2,6 +2,7 @@ package com.floogoobooq.blackomega.paperdeathmessages;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -136,7 +137,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 //Create empty player log file if it doesn't exist
                 File playerDeathLog = new File(serverFolder, player.getName() + "Deaths.log");
                 playerDeathLog.createNewFile();
-                Files.write(playerDeathLog.toPath(), (serializeComponent(event.deathMessage()) + "\r\n").getBytes(), StandardOpenOption.APPEND);
+                Files.write(playerDeathLog.toPath(), (serializeComponentToJson(event.deathMessage()) + "\r\n").getBytes(), StandardOpenOption.APPEND);
             }
         } catch (IOException e) {
             getLogger().log(Level.WARNING, "Can't log death of " + player.getName() + ", IOError");
@@ -151,6 +152,14 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             return "";
         } else {
             return PlainTextComponentSerializer.plainText().serialize(component);
+        }
+    }
+
+    private String serializeComponentToJson(Component component) {
+        if (component == null) {
+            return "";
+        } else {
+            return GsonComponentSerializer.gson().serialize(component);
         }
     }
 
