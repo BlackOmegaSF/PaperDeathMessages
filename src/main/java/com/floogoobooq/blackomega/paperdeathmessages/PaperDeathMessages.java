@@ -210,7 +210,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                     tabCompleteValues.add(_START);
                     tabCompleteValues.add(_STOP);
                 } else {
-                    Pattern pattern = Pattern.compile(args[0].toUpperCase());
+                    Pattern pattern = Pattern.compile(args[0].toLowerCase());
                     if (pattern.matcher(_START).lookingAt()) {
                         tabCompleteValues.add(_START);
                     }
@@ -228,9 +228,12 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                                 }
                             }
                         } else {
-                            for (Player player : sender.getServer().matchPlayer(args[1])) {
-                                if (!playersToTrack.contains(player.getName())) {
-                                    tabCompleteValues.add(player.getName());
+                            for (Player player : sender.getServer().getOnlinePlayers()) {
+                                Pattern pattern = Pattern.compile("^" + args[1]);
+                                if (pattern.matcher(player.getName()).lookingAt()) {
+                                    if (!playersToTrack.contains(player.getName())) {
+                                        tabCompleteValues.add(player.getName());
+                                    }
                                 }
                             }
                         }
@@ -251,9 +254,6 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
 
                 }
 
-            } else if (args.length > 2) {
-                //Too many arguments
-                return null;
             }
             return tabCompleteValues;
         }
