@@ -220,10 +220,12 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             List<String> tabCompleteValues = new ArrayList<>();
             final String _START = "start";
             final String _STOP = "stop";
+            final String _LIST = "list";
             if (args.length == 1) {
                 if (args[0].isEmpty()) {
                     tabCompleteValues.add(_START);
                     tabCompleteValues.add(_STOP);
+                    tabCompleteValues.add(_LIST);
                 } else {
                     Pattern pattern = Pattern.compile(args[0].toLowerCase());
                     if (pattern.matcher(_START).lookingAt()) {
@@ -231,6 +233,9 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                     }
                     if (pattern.matcher(_STOP).lookingAt()) {
                         tabCompleteValues.add(_STOP);
+                    }
+                    if (pattern.matcher(_LIST).lookingAt()) {
+                        tabCompleteValues.add(_LIST);
                     }
                 }
             } else if (args.length == 2) {
