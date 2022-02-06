@@ -164,12 +164,18 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 return false;
             }
 
+            if (args[0].equalsIgnoreCase(_LIST)) {
+                StringJoiner joiner = new StringJoiner(", ");
+                playersToTrack.forEach(joiner::add);
+                sender.sendMessage("Tracking deaths for: " + joiner);
+                return true;
+            }
+
             Player targetPlayer = sender.getServer().getPlayer(args[1]);
             if (targetPlayer == null) {
                 sender.sendMessage("Player not found");
                 return true;
             }
-
 
             final String playerName = targetPlayer.getName();
             switch (args[0].toLowerCase()) {
@@ -196,12 +202,6 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                     } catch (NullPointerException e) {
                         sender.sendMessage("Deaths aren't being logged for " + playerName);
                     }
-                    return true;
-                }
-                case _LIST -> {
-                    StringJoiner joiner = new StringJoiner(", ");
-                    playersToTrack.forEach(joiner::add);
-                    sender.sendMessage("Tracking deaths for: " + joiner);
                     return true;
                 }
 
