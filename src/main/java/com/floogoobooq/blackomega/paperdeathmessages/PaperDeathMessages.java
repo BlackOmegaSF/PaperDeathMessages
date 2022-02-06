@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
@@ -151,13 +152,17 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
                 return false;
             } else if (args.length < 2) {
-                sender.sendMessage("Missing arguments");
+                sender.sendMessage("Missing arguments!");
+                return false;
+            } else if (args.length > 2) {
+                sender.sendMessage("Too many arguments!");
+                return false;
             }
 
             Player targetPlayer = sender.getServer().getPlayer(args[1]);
             if (targetPlayer == null) {
                 sender.sendMessage("Player not found");
-                return false;
+                return true;
             }
 
             final String _START = "start";
@@ -229,8 +234,8 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                             }
                         } else {
                             for (Player player : sender.getServer().getOnlinePlayers()) {
-                                Pattern pattern = Pattern.compile("^" + args[1]);
-                                if (pattern.matcher(player.getName()).lookingAt()) {
+                                Pattern pattern = Pattern.compile(args[1].toLowerCase());
+                                if (pattern.matcher(player.getName().toLowerCase()).lookingAt()) {
                                     if (!playersToTrack.contains(player.getName())) {
                                         tabCompleteValues.add(player.getName());
                                     }
@@ -244,8 +249,8 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                             tabCompleteValues.addAll(playersToTrack);
                         } else {
                             for(String name : playersToTrack) {
-                                Pattern pattern = Pattern.compile(args[1].toUpperCase());
-                                if (pattern.matcher(name.toUpperCase()).lookingAt()) {
+                                Pattern pattern = Pattern.compile(args[1].toLowerCase());
+                                if (pattern.matcher(name.toLowerCase()).lookingAt()) {
                                     tabCompleteValues.add(name);
                                 }
                             }
