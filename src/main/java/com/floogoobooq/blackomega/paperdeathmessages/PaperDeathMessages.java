@@ -185,7 +185,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                         saveConfig();
                         sender.sendMessage("Stopped logging deaths for " + playerName);
                     } catch (NullPointerException e) {
-                        sender.sendMessage("Deaths weren't being logged for " + playerName);
+                        sender.sendMessage("Deaths aren't being logged for " + playerName);
                     }
                     return true;
                 }
