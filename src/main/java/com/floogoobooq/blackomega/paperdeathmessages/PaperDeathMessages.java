@@ -151,9 +151,12 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
 
         @Override
         public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+            final String _START = "start";
+            final String _STOP = "stop";
+            final String _LIST = "list";
             if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
                 return false;
-            } else if (args.length < 2) {
+            } else if (args.length < 2 && !args[0].equalsIgnoreCase(_LIST)) {
                 sender.sendMessage("Missing arguments!");
                 return false;
             } else if (args.length > 2) {
@@ -167,8 +170,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 return true;
             }
 
-            final String _START = "start";
-            final String _STOP = "stop";
+
             final String playerName = targetPlayer.getName();
             switch (args[0].toLowerCase()) {
                 case _START -> {
@@ -196,12 +198,18 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                     }
                     return true;
                 }
+                case _LIST -> {
+                    StringJoiner joiner = new StringJoiner(", ");
+                    playersToTrack.forEach(joiner::add);
+                    sender.sendMessage("Tracking deaths for: " + joiner);
+                    return true;
+                }
+
                 default -> {
                     sender.sendMessage("Invalid parameter \"" + args[0].toLowerCase() + "\"");
                     return false;
                 }
             }
-
         }
     }
 
