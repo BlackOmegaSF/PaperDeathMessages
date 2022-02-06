@@ -21,10 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
@@ -137,7 +135,11 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                 //Create empty player log file if it doesn't exist
                 File playerDeathLog = new File(serverFolder, player.getName() + "Deaths.log");
                 playerDeathLog.createNewFile();
-                Files.write(playerDeathLog.toPath(), (ComponentHandler.serializeComplexComponent(event.deathMessage()) + "\r\n").getBytes(), StandardOpenOption.APPEND);
+                String serializedMessage = ComponentHandler.serializeComplexComponent(event.deathMessage());
+                Date now = new Date();
+                SimpleDateFormat format = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+
+                Files.write(playerDeathLog.toPath(), ("[" + format.format(now) + "] " + serializedMessage + "\r\n").getBytes(), StandardOpenOption.APPEND);
             }
         } catch (IOException e) {
             getLogger().log(Level.WARNING, "Can't log death of " + player.getName() + ", IOError");
