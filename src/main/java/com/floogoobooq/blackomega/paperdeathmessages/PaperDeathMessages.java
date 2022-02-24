@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -139,7 +140,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
         HoverEvent<Component> teleportHoverEvent = HoverEvent.showText(Component.text("Click to teleport"));
         ClickEvent teleportClickEvent = ClickEvent.suggestCommand("/tp @s " + playerX + " " + playerY + " " + playerZ);
 
-        componentBuilder.append(deathLocationBuilder.hoverEvent(teleportHoverEvent).clickEvent(teleportClickEvent));
+        componentBuilder.append(deathLocationBuilder.hoverEvent(teleportHoverEvent).clickEvent(teleportClickEvent).color(NamedTextColor.GREEN));
 
         event.deathMessage(componentBuilder.asComponent());
 
