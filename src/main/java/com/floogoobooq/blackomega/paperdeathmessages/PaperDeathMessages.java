@@ -2,6 +2,9 @@ package com.floogoobooq.blackomega.paperdeathmessages;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -64,6 +67,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
         }
         DamageCause cause = player.getLastDamageCause().getCause();
         Component displayName = player.displayName();
+        Location playerLocation = player.getLocation();
 
         TextComponent.Builder componentBuilder = Component.empty().toBuilder();
 
@@ -105,7 +109,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                     componentBuilder.append(killer.displayName());
                     componentBuilder.append(Component.text(" bitchwhipped "));
                     componentBuilder.append(displayName);
-                    player.getWorld().playSound(player.getLocation(), "custom.whip", 1F, 1F);
+                    player.getWorld().playSound(playerLocation, "custom.whip", 1F, 1F);
                 } else {
                     componentBuilder.append(checkNullComponent(event.deathMessage()));
                 }
@@ -117,13 +121,25 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             componentBuilder.append(checkNullComponent(event.deathMessage()));
         }
 
-        componentBuilder.append(Component.text(" at ["));
-        componentBuilder.append(Component.text(player.getLocation().getBlockX()));
-        componentBuilder.append(Component.text(", "));
-        componentBuilder.append(Component.text(player.getLocation().getBlockY()));
-        componentBuilder.append(Component.text(", "));
-        componentBuilder.append(Component.text(player.getLocation().getBlockZ()));
-        componentBuilder.append(Component.text("]"));
+        componentBuilder.append(Component.text(" at "));
+
+        TextComponent.Builder deathLocationBuilder = Component.empty().toBuilder();
+        int playerX = playerLocation.getBlockX();
+        int playerY = playerLocation.getBlockY();
+        int playerZ = playerLocation.getBlockZ();
+
+        deathLocationBuilder.append(Component.text("["));
+        deathLocationBuilder.append(Component.text(playerX));
+        deathLocationBuilder.append(Component.text(", "));
+        deathLocationBuilder.append(Component.text(playerY));
+        deathLocationBuilder.append(Component.text(", "));
+        deathLocationBuilder.append(Component.text(playerZ));
+        deathLocationBuilder.append(Component.text("]"));
+
+        HoverEvent<Component> teleportHoverEvent = HoverEvent.showText(Component.text("Click to teleport"));
+        ClickEvent teleportClickEvent = ClickEvent.suggestCommand("tp " + playerX + " " + playerY + " " + playerZ);
+
+        componentBuilder.append(deathLocationBuilder.hoverEvent(teleportHoverEvent).clickEvent(teleportClickEvent));
 
         event.deathMessage(componentBuilder.asComponent());
 
