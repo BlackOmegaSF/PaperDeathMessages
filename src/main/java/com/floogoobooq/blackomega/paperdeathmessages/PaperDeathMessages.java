@@ -137,7 +137,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
         deathLocationBuilder.append(Component.text("]"));
 
         HoverEvent<Component> teleportHoverEvent = HoverEvent.showText(Component.text("Click to teleport"));
-        ClickEvent teleportClickEvent = ClickEvent.suggestCommand("tp " + playerX + " " + playerY + " " + playerZ);
+        ClickEvent teleportClickEvent = ClickEvent.suggestCommand("/tp @s " + playerX + " " + playerY + " " + playerZ);
 
         componentBuilder.append(deathLocationBuilder.hoverEvent(teleportHoverEvent).clickEvent(teleportClickEvent));
 
