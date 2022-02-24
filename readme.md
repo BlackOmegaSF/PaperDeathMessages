@@ -4,6 +4,6 @@ Adds some custom death messages, adds coordinates to all death messages, and can
 
 If you're using my custom resource pack, this plugin will also play the classic oof sound when a player dies.
 
-To log player deaths, run the command /logdeaths <start|stop|list> <player>
+To log player deaths, run the command /logdeaths &lt;start|stop|list&gt; &lt;player&gt;
 
 Death messages will be logged to a file in the server's root folder: [player]Deaths.log
