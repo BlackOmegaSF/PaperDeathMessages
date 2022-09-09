@@ -1,7 +1,7 @@
 name: PaperDeathMessages
-version: 2.1.3
+version: 3.1.3
 main: com.floogoobooq.blackomega.paperdeathmessages.PaperDeathMessages
-api-version: 1.18
+api-version: 1.19
 commands:
   logdeaths:
     description: Logs player's deaths
