@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -34,16 +35,29 @@ import static com.floogoobooq.blackomega.paperdeathmessages.ComponentHandler.che
 
 public class PaperDeathMessages extends JavaPlugin implements Listener {
 
-    private final List<String> playersToTrack = new ArrayList<>();
+    private final String trackedPlayersConfigName = "uuids";
+
+    private final Map<UUID,String> playersToTrack = new HashMap<>();
     File serverFolder;
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         saveDefaultConfig(); //Saves default config if none exists. Will not overwrite existing
+
         //Get and load config
-        List<String> loadedTrackedPlayers = getConfig().getStringList("players");
-        playersToTrack.addAll(loadedTrackedPlayers);
+        List<String> loadedOldTrackedPlayers = getConfig().getStringList("players");
+        if (loadedOldTrackedPlayers.size() > 0) { // There are old tracked players
+            for (String player : loadedOldTrackedPlayers) {
+                getLogger().log(Level.WARNING, "Player " + player + "'s deaths are no longer being logged due to old data format.");
+            }
+            getConfig().set("players", null);
+        }
+
+        List<Map<?, ?>> loadedTrackedPlayers = getConfig().getMapList(trackedPlayersConfigName);
+        if (loadedTrackedPlayers.size() == 1) {
+            playersToTrack.putAll((Map<UUID, String>) loadedTrackedPlayers.get(0)); // Please ignore the unchecked cast
+        }
         serverFolder = getServer().getWorldContainer();
 
         //Register player logging command
@@ -55,6 +69,44 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+
+    }
+
+    @EventHandler
+    public void playerJoin(PlayerJoinEvent event) {
+
+        Player player = event.getPlayer();
+
+        //Check if incoming player's deaths are being tracked
+        if (!playersToTrack.containsKey(player.getUniqueId())) {
+            return;
+        }
+
+        // Check if player's current name is up-to-date
+        if ((playersToTrack.get(player.getUniqueId()).equals(player.getName()))) {
+            getLogger().log(Level.INFO, "Player " + player.getName() + " has a new name, updating the death log tracker");
+            //Player's name needs to be updated
+            String oldPlayerName = playersToTrack.put(player.getUniqueId(), player.getName()); // This both updates and returns the old value
+            getConfig().set(trackedPlayersConfigName, new Map[] { playersToTrack });
+            saveConfig();
+
+            // Rename death log file
+
+            File deathLogFile = new File(serverFolder, oldPlayerName + "( " + player.getUniqueId() + ")Deaths.log");
+            if (!deathLogFile.exists()) {
+                //Death log doesn't exist, so no renaming needed
+                return;
+            }
+            File targetDeathLog = new File(serverFolder, player.getName() + "( " + player.getUniqueId() + ")Deaths.log");
+            if (targetDeathLog.exists()) {
+                getLogger().log(Level.WARNING, "Player " + player.getName() + "'s new name already has a log file, unable to rename the old one.");
+                return;
+            }
+            if (!deathLogFile.renameTo(targetDeathLog)) {
+                getLogger().log(Level.WARNING, "Unable to rename death log file for " + player.getName());
+            }
+
+        }
 
     }
 
@@ -148,9 +200,9 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
 
         //Log the death message to output file
         try {
-            if (playersToTrack.contains(player.getName())) { //Player's death should be tracked
+            if (playersToTrack.containsKey(player.getUniqueId())) { //Player's death should be tracked
                 //Create empty player log file if it doesn't exist
-                File playerDeathLog = new File(serverFolder, player.getName() + "Deaths.log");
+                File playerDeathLog = new File(serverFolder, player.getName() + "( " + player.getUniqueId() + ")Deaths.log");
                 playerDeathLog.createNewFile();
                 String serializedMessage = ComponentHandler.serializeComplexComponent(event.deathMessage());
                 Date now = new Date();
@@ -183,7 +235,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
 
             if (args[0].equalsIgnoreCase(_LIST)) {
                 StringJoiner joiner = new StringJoiner(", ");
-                playersToTrack.forEach(joiner::add);
+                playersToTrack.values().forEach(joiner::add);
                 sender.sendMessage("Tracking deaths for: " + joiner);
                 return true;
             }
@@ -195,25 +247,26 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
             }
 
             final String playerName = targetPlayer.getName();
+            final UUID playerId = targetPlayer.getUniqueId();
             switch (args[0].toLowerCase()) {
                 case _START -> {
-                    if (playersToTrack.contains(playerName)) {
+                    if (playersToTrack.containsKey(playerId)) {
                         sender.sendMessage("Already logging deaths for " + playerName);
                         return true;
                     }
-                    playersToTrack.add(playerName);
-                    getConfig().set("players", playersToTrack);
+                    playersToTrack.put(playerId, playerName);
+                    getConfig().set(trackedPlayersConfigName, new Map[] { playersToTrack });
                     saveConfig();
                     sender.sendMessage("Now logging deaths for " + playerName);
                     return true;
                 }
                 case _STOP -> {
                     try {
-                        if (!playersToTrack.contains(playerName)) {
+                        if (!playersToTrack.containsKey(playerId)) {
                             throw new NullPointerException();
                         }
-                        playersToTrack.remove(playerName);
-                        getConfig().set("players", playersToTrack);
+                        playersToTrack.remove(playerId);
+                        getConfig().set(trackedPlayersConfigName, new Map[] { playersToTrack });
                         saveConfig();
                         sender.sendMessage("Stopped logging deaths for " + playerName);
                     } catch (NullPointerException e) {
@@ -260,7 +313,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                     case _START -> {
                         if (args[1].isEmpty()) {
                             for (Player player : sender.getServer().getOnlinePlayers()) {
-                                if (!playersToTrack.contains(player.getName())) {
+                                if (!playersToTrack.containsKey(player.getUniqueId())) {
                                     tabCompleteValues.add(player.getName());
                                 }
                             }
@@ -268,7 +321,7 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
                             for (Player player : sender.getServer().getOnlinePlayers()) {
                                 Pattern pattern = Pattern.compile(args[1].toLowerCase());
                                 if (pattern.matcher(player.getName().toLowerCase()).lookingAt()) {
-                                    if (!playersToTrack.contains(player.getName())) {
+                                    if (!playersToTrack.containsKey(player.getUniqueId())) {
                                         tabCompleteValues.add(player.getName());
                                     }
                                 }
@@ -278,9 +331,9 @@ public class PaperDeathMessages extends JavaPlugin implements Listener {
 
                     case _STOP  -> {
                         if (args[1].isEmpty()) {
-                            tabCompleteValues.addAll(playersToTrack);
+                            tabCompleteValues.addAll(playersToTrack.values());
                         } else {
-                            for(String name : playersToTrack) {
+                            for(String name : playersToTrack.values()) {
                                 Pattern pattern = Pattern.compile(args[1].toLowerCase());
                                 if (pattern.matcher(name.toLowerCase()).lookingAt()) {
                                     tabCompleteValues.add(name);
