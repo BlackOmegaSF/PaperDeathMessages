@@ -1,13 +1,10 @@
 package com.kleinercode.plugins.paperdeathmessages;
 
-import com.google.common.collect.Multimap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.TranslationArgument;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
