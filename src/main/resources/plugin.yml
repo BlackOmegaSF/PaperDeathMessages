@@ -1,0 +1,4 @@
+name: PaperDeathMessages
+version: '1.0-SNAPSHOT'
+main: com.kleinercode.plugins.paperdeathmessages.PaperDeathMessages
+api-version: '1.21'
