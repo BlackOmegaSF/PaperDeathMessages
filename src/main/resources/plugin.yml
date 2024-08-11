@@ -1,4 +1,8 @@
 name: PaperDeathMessages
-version: '1.0-SNAPSHOT'
+version: '3.0.0'
 main: com.kleinercode.plugins.paperdeathmessages.PaperDeathMessages
 api-version: '1.21'
+commands:
+  logdeaths:
+    description: Logs player's deaths
+    usage: Usage is /logdeaths <start | stop> <player>
